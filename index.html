@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#155e75" />
+  <title>Calm the Unquiet Mind｜安定日誌</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: { ink:'#18343b', ocean:'#155e75', mint:'#dff4ef', cloud:'#f4f8f7', coral:'#e87968' },
+        fontFamily: { sans:['ui-rounded','"Noto Sans TC"','system-ui','sans-serif'] },
+        boxShadow: { soft:'0 18px 45px rgba(20,67,75,.10)' }
+      }}
+    };
+  </script>
+  <style>
+    input[type="range"]{accent-color:#155e75} input[type="checkbox"]{accent-color:#155e75}
+    .tab[aria-selected="true"]{background:#155e75;color:white;box-shadow:0 7px 18px rgba(21,94,117,.22)}
+    .card{background:rgba(255,255,255,.92);border:1px solid rgba(21,94,117,.10);border-radius:1.5rem;box-shadow:0 18px 45px rgba(20,67,75,.08)}
+    .field{width:100%;border:1px solid #cbdeda;border-radius:.9rem;background:white;padding:.72rem .85rem;color:#18343b;outline:none}
+    .field:focus{border-color:#155e75;box-shadow:0 0 0 3px rgba(21,94,117,.12)}
+    @media(prefers-reduced-motion:no-preference){.view{animation:rise .25s ease-out}@keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}}
+  </style>
+</head>
+<body class="min-h-screen bg-cloud text-ink selection:bg-mint">
+  <div class="fixed inset-x-0 top-0 h-48 bg-gradient-to-br from-cyan-900 via-ocean to-teal-700 -z-10"></div>
+  <main class="mx-auto max-w-5xl px-4 pb-12 pt-7 sm:px-6">
+    <header class="mb-5 flex items-start justify-between gap-4 text-white">
+      <div><p class="mb-1 text-sm font-semibold tracking-[.18em] text-cyan-100">安定日誌</p><h1 class="text-2xl font-bold sm:text-3xl">Calm the Unquiet Mind</h1><p class="mt-1 text-sm text-cyan-50/85">每天兩分鐘，看見自己的節奏。</p></div>
+      <div id="saveState" class="rounded-full bg-white/15 px-3 py-1.5 text-xs backdrop-blur">僅儲存在此裝置</div>
+    </header>
+
+    <nav class="card mb-5 grid grid-cols-3 gap-1.5 p-1.5" aria-label="主要功能">
+      <button class="tab rounded-xl px-2 py-3 text-sm font-bold" data-view="today" aria-selected="true">今日記錄</button>
+      <button class="tab rounded-xl px-2 py-3 text-sm font-bold" data-view="trend" aria-selected="false">月度趨勢</button>
+      <button class="tab rounded-xl px-2 py-3 text-sm font-bold" data-view="history" aria-selected="false">歷史資料</button>
+    </nav>
+
+    <section id="today" class="view">
+      <form id="entryForm" class="grid gap-5 lg:grid-cols-[1.08fr_.92fr]">
+        <div class="card p-5 sm:p-7">
+          <div class="mb-6 flex items-center justify-between gap-3"><div><p class="text-sm text-slate-500">日期</p><input id="date" type="date" required class="mt-1 bg-transparent text-xl font-bold outline-none" /></div><span id="editBadge" class="hidden rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">編輯紀錄</span></div>
+          <label class="block text-sm font-bold" for="mood">今天的心情 <span id="moodText" class="ml-2 text-ocean">平穩 · 5</span></label>
+          <input id="mood" type="range" min="1" max="10" value="5" class="mt-4 w-full" />
+          <div class="mt-1 flex justify-between text-xl" aria-hidden="true"><span>😞</span><span>😕</span><span>😐</span><span>🙂</span><span>😄</span></div>
+          <div class="mt-7 grid grid-cols-2 gap-4">
+            <label class="text-sm font-bold">入睡時間<input id="sleepTime" type="time" class="field mt-2" /></label>
+            <label class="text-sm font-bold">起床時間<input id="wakeTime" type="time" class="field mt-2" /></label>
+            <label class="text-sm font-bold">睡眠時數<input id="sleepHours" type="number" min="0" max="24" step="0.5" placeholder="例如 7.5" class="field mt-2" /></label>
+            <label class="text-sm font-bold">睡眠品質<select id="sleepQuality" class="field mt-2"><option value="">未填寫</option><option value="1">1 · 很差</option><option value="2">2 · 偏差</option><option value="3">3 · 普通</option><option value="4">4 · 不錯</option><option value="5">5 · 很好</option></select></label>
+          </div>
+          <label class="mt-6 block text-sm font-bold">今天想留下的話<textarea id="note" rows="3" maxlength="500" placeholder="發生了什麼？身體或情緒有什麼感覺？" class="field mt-2 resize-y"></textarea></label>
+        </div>
+
+        <div class="space-y-5">
+          <div class="card p-5 sm:p-6"><h2 class="text-lg font-bold">服藥紀錄</h2><label class="mt-4 flex cursor-pointer items-center gap-3 rounded-2xl bg-mint/70 p-4"><input id="medTaken" type="checkbox" class="h-5 w-5" /><span><strong class="block">今天已按醫囑服藥</strong><small class="text-slate-600">只記錄是否服用，不提供劑量建議</small></span></label><label class="mt-3 block text-sm font-bold">備註<input id="medNote" class="field mt-2" maxlength="120" placeholder="例如：晚間服用、忘記一劑" /></label></div>
+          <div class="card p-5 sm:p-6"><div class="flex items-center justify-between"><h2 class="text-lg font-bold">輕躁症狀觀察</h2><span id="symptomCount" class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold">0 項</span></div><div id="symptoms" class="mt-4 grid gap-2"></div></div>
+          <button type="submit" class="w-full rounded-2xl bg-ocean px-5 py-4 font-bold text-white shadow-lg shadow-cyan-900/20 transition hover:bg-cyan-800 focus:outline-none focus:ring-4 focus:ring-cyan-700/20">儲存今天的紀錄</button>
+        </div>
+      </form>
+      <aside class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"><strong>溫柔提醒：</strong>這個工具用來協助自我觀察，不能取代醫師診斷。若出現連續數日幾乎不需睡眠、衝動失控、自傷念頭或無法確保安全，請立即聯絡信任的人、你的醫療團隊，或當地緊急服務。</aside>
+    </section>
+
+    <section id="trend" class="view hidden space-y-5">
+      <div class="card p-5 sm:p-7"><div class="mb-5 flex flex-wrap items-end justify-between gap-3"><div><label for="monthPick" class="text-sm font-bold text-slate-600">查看月份</label><input id="monthPick" type="month" class="field mt-2" /></div><p id="monthSummary" class="text-sm text-slate-600"></p></div><div class="relative h-72 w-full"><canvas id="chart" aria-label="每月心情與睡眠趨勢圖"></canvas></div><div class="mt-4 flex flex-wrap gap-4 text-sm"><span><i class="mr-2 inline-block h-2.5 w-2.5 rounded-full bg-ocean"></i>心情（1–10）</span><span><i class="mr-2 inline-block h-2.5 w-2.5 rounded-full bg-coral"></i>睡眠時數</span></div></div>
+      <div id="insights" class="grid gap-4 sm:grid-cols-3"></div>
+    </section>
+
+    <section id="history" class="view hidden space-y-5">
+      <div class="card p-5 sm:p-7"><div class="flex flex-wrap items-center justify-between gap-3"><div><h2 class="text-xl font-bold">歷史紀錄</h2><p id="recordCount" class="mt-1 text-sm text-slate-500">共 0 筆</p></div><div class="flex flex-wrap gap-2"><button id="exportBtn" type="button" class="rounded-xl border border-ocean px-3 py-2 text-sm font-bold text-ocean">匯出備份</button><label class="cursor-pointer rounded-xl border border-slate-300 px-3 py-2 text-sm font-bold">匯入備份<input id="importInput" type="file" accept="application/json" class="hidden" /></label></div></div><div id="historyList" class="mt-5 space-y-3"></div></div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600"><strong class="text-ink">隱私說明：</strong>資料只會存於目前瀏覽器的 LocalStorage，不會自動上傳。清除瀏覽資料、換裝置或使用無痕模式可能使紀錄消失，請定期匯出備份。</div>
+    </section>
+  </main>
+
+  <div id="toast" role="status" aria-live="polite" class="pointer-events-none fixed bottom-5 left-1/2 hidden -translate-x-1/2 rounded-full bg-ink px-5 py-3 text-sm font-bold text-white shadow-xl"></div>
+  <script>
+    const KEY='calmMindEntriesV1';
+    const symptomOptions=['睡眠需求明顯減少','想法快速、停不下來','說話比平常多或快','精力或活動量增加','注意力容易分散','異常自信或亢奮','衝動消費／冒險行為','明顯易怒或坐立不安'];
+    const $=id=>document.getElementById(id); let entries=load(), editingDate=null;
+    function localDate(d=new Date()){const z=new Date(d-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)}
+    function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x:[]}catch{return []}}
+    function persist(){localStorage.setItem(KEY,JSON.stringify(entries));$('saveState').textContent='✓ 已儲存在此裝置';setTimeout(()=>$('saveState').textContent='僅儲存在此裝置',1800)}
+    function toast(msg){$('toast').textContent=msg;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),2200)}
+    function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+    symptomOptions.forEach((s,i)=>$('symptoms').insertAdjacentHTML('beforeend',`<label class="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 p-3 text-sm"><input type="checkbox" value="${i}" class="symptom h-4 w-4"><span>${s}</span></label>`));
+    function moodLabel(n){return n<=2?'低落':n<=4?'偏低':n<=6?'平穩':n<=8?'愉快':'高昂'}
+    function updateMood(){$('moodText').textContent=`${moodLabel(+$('mood').value)} · ${$('mood').value}`}
+    function updateSymptoms(){$('symptomCount').textContent=`${document.querySelectorAll('.symptom:checked').length} 項`}
+    $('mood').addEventListener('input',updateMood);document.querySelectorAll('.symptom').forEach(x=>x.addEventListener('change',updateSymptoms));
+    $('date').value=localDate();$('monthPick').value=localDate().slice(0,7);
+    document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===btn));document.querySelectorAll('.view').forEach(x=>x.classList.toggle('hidden',x.id!==btn.dataset.view));if(btn.dataset.view==='trend')renderTrend();if(btn.dataset.view==='history')renderHistory()}));
+    $('entryForm').addEventListener('submit',e=>{e.preventDefault();const date=$('date').value;const item={date,mood:+$('mood').value,sleepTime:$('sleepTime').value,wakeTime:$('wakeTime').value,sleepHours:$('sleepHours').value===''?null:+$('sleepHours').value,sleepQuality:$('sleepQuality').value===''?null:+$('sleepQuality').value,medTaken:$('medTaken').checked,medNote:$('medNote').value.trim(),symptoms:[...document.querySelectorAll('.symptom:checked')].map(x=>+x.value),note:$('note').value.trim(),updatedAt:new Date().toISOString()};entries=entries.filter(x=>x.date!==date);entries.push(item);entries.sort((a,b)=>a.date.localeCompare(b.date));persist();editingDate=null;$('editBadge').classList.add('hidden');toast('紀錄已安全儲存');});
+    function fillForm(item){['date','sleepTime','wakeTime','medNote','note'].forEach(k=>$(k).value=item[k]||'');$('mood').value=item.mood;$('sleepHours').value=item.sleepHours??'';$('sleepQuality').value=item.sleepQuality??'';$('medTaken').checked=!!item.medTaken;document.querySelectorAll('.symptom').forEach(x=>x.checked=item.symptoms?.includes(+x.value));editingDate=item.date;$('editBadge').classList.remove('hidden');updateMood();updateSymptoms();document.querySelector('[data-view="today"]').click();scrollTo({top:0,behavior:'smooth'})}
+    function renderHistory(){const list=[...entries].reverse();$('recordCount').textContent=`共 ${list.length} 筆紀錄`;$('historyList').innerHTML=list.length?list.map(x=>`<article class="rounded-2xl border border-slate-200 p-4"><div class="flex items-start justify-between gap-3"><div><time class="font-bold">${esc(x.date)}</time><p class="mt-1 text-sm text-slate-600">心情 ${x.mood}/10 · 睡眠 ${x.sleepHours??'—'} 小時 · 症狀 ${x.symptoms?.length||0} 項 · ${x.medTaken?'已服藥':'未勾選服藥'}</p>${x.note?`<p class="mt-2 text-sm">${esc(x.note)}</p>`:''}</div><div class="flex shrink-0 gap-2"><button class="edit rounded-lg bg-mint px-2.5 py-1.5 text-xs font-bold" data-date="${x.date}">編輯</button><button class="del rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-bold text-red-700" data-date="${x.date}">刪除</button></div></div></article>`).join(''):'<div class="rounded-2xl bg-slate-50 p-8 text-center text-slate-500">還沒有紀錄。從今天寫下第一筆吧。</div>';
+      document.querySelectorAll('.edit').forEach(b=>b.onclick=()=>fillForm(entries.find(x=>x.date===b.dataset.date)));document.querySelectorAll('.del').forEach(b=>b.onclick=()=>{if(confirm(`確定刪除 ${b.dataset.date} 的紀錄嗎？此動作無法復原。`)){entries=entries.filter(x=>x.date!==b.dataset.date);persist();renderHistory();toast('紀錄已刪除')}})}
+    function renderTrend(){const month=$('monthPick').value, data=entries.filter(x=>x.date.startsWith(month));const days=new Date(+month.slice(0,4),+month.slice(5,7),0).getDate();const canvas=$('chart'),box=canvas.parentElement,dpr=devicePixelRatio||1;canvas.width=box.clientWidth*dpr;canvas.height=box.clientHeight*dpr;const c=canvas.getContext('2d');c.scale(dpr,dpr);const w=box.clientWidth,h=box.clientHeight,p={l:34,r:12,t:16,b:30};c.clearRect(0,0,w,h);c.font='12px system-ui';c.fillStyle='#64748b';c.strokeStyle='#d9e6e3';c.lineWidth=1;for(let y=0;y<=10;y+=2){const py=p.t+(10-y)*(h-p.t-p.b)/10;c.beginPath();c.moveTo(p.l,py);c.lineTo(w-p.r,py);c.stroke();c.fillText(y,8,py+4)}
+      const points=(key,color)=>{c.strokeStyle=color;c.lineWidth=2.5;c.beginPath();let started=false;for(let d=1;d<=days;d++){const item=data.find(x=>+x.date.slice(8)===d),v=item?.[key];if(v==null)continue;const x=p.l+(d-1)*(w-p.l-p.r)/(days-1),y=p.t+(10-Math.min(10,v))*(h-p.t-p.b)/10;if(!started){c.moveTo(x,y);started=true}else c.lineTo(x,y)}c.stroke();data.forEach(item=>{const v=item[key];if(v==null)return;const d=+item.date.slice(8),x=p.l+(d-1)*(w-p.l-p.r)/(days-1),y=p.t+(10-Math.min(10,v))*(h-p.t-p.b)/10;c.fillStyle=color;c.beginPath();c.arc(x,y,3.5,0,Math.PI*2);c.fill()})};points('mood','#155e75');points('sleepHours','#e87968');for(let d=1;d<=days;d+=Math.max(1,Math.ceil(days/7))){const x=p.l+(d-1)*(w-p.l-p.r)/(days-1);c.fillStyle='#64748b';c.fillText(d,x-3,h-8)}
+      const avg=k=>{const a=data.map(x=>x[k]).filter(v=>v!=null);return a.length?(a.reduce((s,v)=>s+v,0)/a.length).toFixed(1):'—'},sym=data.reduce((s,x)=>s+(x.symptoms?.length||0),0),med=data.filter(x=>x.medTaken).length;$('monthSummary').textContent=data.length?`${data.length} 天有紀錄`:'這個月尚無紀錄';$('insights').innerHTML=[[avg('mood'),'平均心情','/ 10'],[avg('sleepHours'),'平均睡眠','小時'],[sym,'症狀勾選','次']].map(x=>`<div class="card p-5"><p class="text-sm text-slate-500">${x[1]}</p><p class="mt-2 text-3xl font-bold text-ocean">${x[0]} <small class="text-sm text-slate-500">${x[2]}</small></p></div>`).join('')}
+    $('monthPick').addEventListener('change',renderTrend);window.addEventListener('resize',()=>{if(!$('trend').classList.contains('hidden'))renderTrend()});
+    $('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({app:'Calm the Unquiet Mind',version:1,exportedAt:new Date().toISOString(),entries},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`calm-mind-backup-${localDate()}.json`;a.click();URL.revokeObjectURL(a.href);toast('備份檔已下載')};
+    $('importInput').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const raw=JSON.parse(await f.text()),incoming=Array.isArray(raw)?raw:raw.entries;if(!Array.isArray(incoming)||!incoming.every(x=>/^\d{4}-\d{2}-\d{2}$/.test(x.date)))throw Error();if(!confirm(`將匯入 ${incoming.length} 筆紀錄；相同日期會以備份內容取代。繼續嗎？`))return;const map=new Map(entries.map(x=>[x.date,x]));incoming.forEach(x=>map.set(x.date,x));entries=[...map.values()].sort((a,b)=>a.date.localeCompare(b.date));persist();renderHistory();toast('備份已匯入')}catch{alert('無法讀取這個備份檔，請確認它是由本 App 匯出的 JSON 檔。')}finally{e.target.value=''}};
+    updateMood();updateSymptoms();
+  </script>
+</body>
+</html>
